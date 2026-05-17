@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GameFi Economy Protocol
 
 ## Overview
@@ -47,3 +48,6 @@ forge script script/Deploy.s.sol --rpc-url arbitrum_sepolia --broadcast
 - **ItemVault**: ERC-4626 tokenized vault with yield simulation
 - **LootBox**: Random item drops
 - **MyGovernor + MyTimelock**: Full DAO governance with 2-day delay
+=======
+# blockchain2_finalexam
+>>>>>>> c7b80e015358690eaf5970f919ba9e237345496d
