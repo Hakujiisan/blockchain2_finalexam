@@ -7,7 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockERC20 is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
-    function mint(address to, uint256 amount) external { _mint(to, amount); }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }
 
 contract ResourceAMMTest is Test {
@@ -16,7 +19,7 @@ contract ResourceAMMTest is Test {
     MockERC20 public tokenB;
 
     address public alice = makeAddr("alice");
-    address public bob   = makeAddr("bob");
+    address public bob = makeAddr("bob");
 
     function setUp() public {
         tokenA = new MockERC20("Gold Token", "GOLD");
@@ -25,8 +28,8 @@ contract ResourceAMMTest is Test {
 
         tokenA.mint(alice, 10000e18);
         tokenB.mint(alice, 10000e18);
-        tokenA.mint(bob,   1000e18);
-        tokenB.mint(bob,   1000e18);
+        tokenA.mint(bob, 1000e18);
+        tokenB.mint(bob, 1000e18);
     }
 
     function test_AddLiquidity() public {

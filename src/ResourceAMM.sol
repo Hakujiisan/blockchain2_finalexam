@@ -7,9 +7,20 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract LPToken is ERC20 {
     address public immutable amm;
-    constructor() ERC20("GameFi LP", "GLP") { amm = msg.sender; }
-    function mint(address to, uint256 amount) external { require(msg.sender == amm); _mint(to, amount); }
-    function burn(address from, uint256 amount) external { require(msg.sender == amm); _burn(from, amount); }
+
+    constructor() ERC20("GameFi LP", "GLP") {
+        amm = msg.sender;
+    }
+
+    function mint(address to, uint256 amount) external {
+        require(msg.sender == amm);
+        _mint(to, amount);
+    }
+
+    function burn(address from, uint256 amount) external {
+        require(msg.sender == amm);
+        _burn(from, amount);
+    }
 }
 
 contract ResourceAMM is ReentrancyGuard {
@@ -33,9 +44,7 @@ contract ResourceAMM is ReentrancyGuard {
         lpToken = new LPToken();
     }
 
-    function addLiquidity(uint256 amount0, uint256 amount1)
-        external nonReentrant returns (uint256 lpMinted)
-    {
+    function addLiquidity(uint256 amount0, uint256 amount1) external nonReentrant returns (uint256 lpMinted) {
         token0.safeTransferFrom(msg.sender, address(this), amount0);
         token1.safeTransferFrom(msg.sender, address(this), amount1);
 
@@ -43,10 +52,7 @@ contract ResourceAMM is ReentrancyGuard {
         if (totalSupply == 0) {
             lpMinted = _sqrt(amount0 * amount1);
         } else {
-            lpMinted = _min(
-                (amount0 * totalSupply) / reserve0,
-                (amount1 * totalSupply) / reserve1
-            );
+            lpMinted = _min((amount0 * totalSupply) / reserve0, (amount1 * totalSupply) / reserve1);
         }
         require(lpMinted > 0, "Insufficient liquidity minted");
         reserve0 += amount0;
@@ -55,9 +61,7 @@ contract ResourceAMM is ReentrancyGuard {
         emit LiquidityAdded(msg.sender, amount0, amount1, lpMinted);
     }
 
-    function removeLiquidity(uint256 lpAmount)
-        external nonReentrant returns (uint256 amount0, uint256 amount1)
-    {
+    function removeLiquidity(uint256 lpAmount) external nonReentrant returns (uint256 amount0, uint256 amount1) {
         uint256 totalSupply = lpToken.totalSupply();
         amount0 = (lpAmount * reserve0) / totalSupply;
         amount1 = (lpAmount * reserve1) / totalSupply;
@@ -71,13 +75,13 @@ contract ResourceAMM is ReentrancyGuard {
     }
 
     function swap(address tokenIn, uint256 amountIn, uint256 minAmountOut)
-        external nonReentrant returns (uint256 amountOut)
+        external
+        nonReentrant
+        returns (uint256 amountOut)
     {
         require(tokenIn == address(token0) || tokenIn == address(token1), "Invalid token");
         bool isToken0 = tokenIn == address(token0);
-        (uint256 reserveIn, uint256 reserveOut) = isToken0
-            ? (reserve0, reserve1)
-            : (reserve1, reserve0);
+        (uint256 reserveIn, uint256 reserveOut) = isToken0 ? (reserve0, reserve1) : (reserve1, reserve0);
 
         IERC20(tokenIn).safeTransferFrom(msg.sender, address(this), amountIn);
 
@@ -99,8 +103,7 @@ contract ResourceAMM is ReentrancyGuard {
 
     function getAmountOut(address tokenIn, uint256 amountIn) public view returns (uint256) {
         bool isToken0 = tokenIn == address(token0);
-        (uint256 reserveIn, uint256 reserveOut) = isToken0
-            ? (reserve0, reserve1) : (reserve1, reserve0);
+        (uint256 reserveIn, uint256 reserveOut) = isToken0 ? (reserve0, reserve1) : (reserve1, reserve0);
         uint256 amountInWithFee = amountIn * (1000 - FEE);
         return (amountInWithFee * reserveOut) / (reserveIn * 1000 + amountInWithFee);
     }
@@ -109,7 +112,8 @@ contract ResourceAMM is ReentrancyGuard {
         if (x == 0) return 0;
         uint256 z = (x + 1) / 2;
         uint256 y = x;
-        while (z < y) { y = z; z = (x / z + z) / 2; }
+        while (z < y) y = z;
+        z = (x / z + z) / 2;
         return y;
     }
 

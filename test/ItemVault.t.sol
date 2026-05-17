@@ -7,7 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockToken is ERC20 {
     constructor() ERC20("Mock", "MCK") {}
-    function mint(address to, uint256 amount) external { _mint(to, amount); }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }
 
 contract ItemVaultTest is Test {
@@ -16,13 +19,13 @@ contract ItemVaultTest is Test {
 
     address public owner = address(this);
     address public alice = makeAddr("alice");
-    address public bob   = makeAddr("bob");
+    address public bob = makeAddr("bob");
 
     function setUp() public {
         token = new MockToken();
         vault = new ItemVault(IERC20(address(token)));
         token.mint(alice, 1000e18);
-        token.mint(bob,   1000e18);
+        token.mint(bob, 1000e18);
         token.mint(owner, 10000e18);
     }
 

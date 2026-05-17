@@ -14,9 +14,9 @@ contract GovernorTest is Test {
     GameItems public items;
 
     address public deployer = address(this);
-    address public voter1   = makeAddr("voter1");
-    address public voter2   = makeAddr("voter2");
-    address public voter3   = makeAddr("voter3");
+    address public voter1 = makeAddr("voter1");
+    address public voter2 = makeAddr("voter2");
+    address public voter3 = makeAddr("voter3");
 
     bytes32 constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
     bytes32 constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
@@ -38,21 +38,23 @@ contract GovernorTest is Test {
         token.transfer(voter2, 200_000e18);
         token.transfer(voter3, 100_000e18);
 
-        vm.prank(voter1); token.delegate(voter1);
-        vm.prank(voter2); token.delegate(voter2);
-        vm.prank(voter3); token.delegate(voter3);
+        vm.prank(voter1);
+        token.delegate(voter1);
+        vm.prank(voter2);
+        token.delegate(voter2);
+        vm.prank(voter3);
+        token.delegate(voter3);
         token.delegate(deployer);
 
         vm.roll(block.number + 1);
     }
 
     function _propose() internal returns (uint256) {
-        bytes memory calldata_ = abi.encodeWithSignature("grantRole(bytes32,address)",
-            items.MINTER_ROLE(), voter1);
+        bytes memory calldata_ = abi.encodeWithSignature("grantRole(bytes32,address)", items.MINTER_ROLE(), voter1);
         address[] memory targets = new address[](1);
-        uint256[] memory values  = new uint256[](1);
-        bytes[]   memory calldatas = new bytes[](1);
-        targets[0]   = address(items);
+        uint256[] memory values = new uint256[](1);
+        bytes[] memory calldatas = new bytes[](1);
+        targets[0] = address(items);
         calldatas[0] = calldata_;
 
         vm.prank(voter1);
@@ -159,11 +161,9 @@ contract GovernorTest is Test {
 
         bytes[] memory calldatas = new bytes[](1);
         address[] memory targets = new address[](1);
-        uint256[] memory values  = new uint256[](1);
+        uint256[] memory values = new uint256[](1);
         targets[0] = address(items);
-        calldatas[0] = abi.encodeWithSignature(
-            "grantRole(bytes32,address)", items.MINTER_ROLE(), smallVoter
-        );
+        calldatas[0] = abi.encodeWithSignature("grantRole(bytes32,address)", items.MINTER_ROLE(), smallVoter);
 
         vm.prank(voter1);
         uint256 pid = governor.propose(targets, values, calldatas, "Small proposal");
@@ -177,21 +177,21 @@ contract GovernorTest is Test {
     function test_FullLifecycle() public {
         items.grantRole(items.DEFAULT_ADMIN_ROLE(), address(timelock));
 
-        bytes memory calldata_ = abi.encodeWithSignature(
-            "grantRole(bytes32,address)", items.MINTER_ROLE(), voter1
-        );
-        address[] memory targets   = new address[](1);
-        uint256[] memory values    = new uint256[](1);
-        bytes[]   memory calldatas = new bytes[](1);
-        targets[0]   = address(items);
+        bytes memory calldata_ = abi.encodeWithSignature("grantRole(bytes32,address)", items.MINTER_ROLE(), voter1);
+        address[] memory targets = new address[](1);
+        uint256[] memory values = new uint256[](1);
+        bytes[] memory calldatas = new bytes[](1);
+        targets[0] = address(items);
         calldatas[0] = calldata_;
 
         vm.prank(voter1);
         uint256 pid = governor.propose(targets, values, calldatas, "Full lifecycle");
 
         vm.roll(block.number + 7201);
-        vm.prank(voter1); governor.castVote(pid, 1);
-        vm.prank(voter2); governor.castVote(pid, 1);
+        vm.prank(voter1);
+        governor.castVote(pid, 1);
+        vm.prank(voter2);
+        governor.castVote(pid, 1);
         vm.roll(block.number + 50401);
         assertEq(uint256(governor.state(pid)), 4);
 

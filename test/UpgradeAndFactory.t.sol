@@ -20,9 +20,7 @@ contract UpgradeAndFactoryTest is Test {
 
     function setUp() public {
         implV1 = new GameItemsV1();
-        bytes memory initData = abi.encodeWithSelector(
-            GameItemsV1.initialize.selector, admin
-        );
+        bytes memory initData = abi.encodeWithSelector(GameItemsV1.initialize.selector, admin);
         ERC1967Proxy proxyContract = new ERC1967Proxy(address(implV1), initData);
         proxy = GameItemsV1(address(proxyContract));
 

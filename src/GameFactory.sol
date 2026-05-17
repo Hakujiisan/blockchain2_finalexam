@@ -38,12 +38,8 @@ contract GameFactory is Ownable {
     }
 
     function predictAddress(bytes32 salt) external view returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(
-            bytes1(0xff),
-            address(this),
-            salt,
-            keccak256(type(GameItems).creationCode)
-        ));
+        bytes32 hash =
+            keccak256(abi.encodePacked(bytes1(0xff), address(this), salt, keccak256(type(GameItems).creationCode)));
         return address(uint160(uint256(hash)));
     }
 

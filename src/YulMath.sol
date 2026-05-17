@@ -30,9 +30,7 @@ contract YulMath {
         }
     }
 
-    function mulDiv(uint256 x, uint256 y, uint256 denominator)
-        public pure returns (uint256 result)
-    {
+    function mulDiv(uint256 x, uint256 y, uint256 denominator) public pure returns (uint256 result) {
         assembly {
             let prod := mul(x, y)
             result := div(prod, denominator)

@@ -9,7 +9,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockToken is ERC20 {
     constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
-    function mint(address to, uint256 amount) external { _mint(to, amount); }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
 }
 
 contract ForkTest is Test {
@@ -19,16 +22,16 @@ contract ForkTest is Test {
     ResourceAMM public amm;
 
     address public alice = makeAddr("alice");
-    address public bob   = makeAddr("bob");
+    address public bob = makeAddr("bob");
 
     function setUp() public {
         oracle = new MockAggregator(2000e8);
-        token  = new MockToken("Test", "TST");
-        vault  = new ItemVault(IERC20(address(token)));
-        amm    = new ResourceAMM(address(token), address(token));
+        token = new MockToken("Test", "TST");
+        vault = new ItemVault(IERC20(address(token)));
+        amm = new ResourceAMM(address(token), address(token));
 
         token.mint(alice, 10000e18);
-        token.mint(bob,   10000e18);
+        token.mint(bob, 10000e18);
     }
 
     function test_Fork_OraclePrice() public view {
@@ -40,7 +43,7 @@ contract ForkTest is Test {
     function test_Fork_OracleStaleness() public {
         vm.warp(block.timestamp + 3 hours);
         oracle.setUpdatedAt(block.timestamp - 2 hours);
-        (, , , uint256 updatedAt,) = oracle.latestRoundData();
+        (,,, uint256 updatedAt,) = oracle.latestRoundData();
         assertTrue(block.timestamp - updatedAt > 1 hours);
     }
 

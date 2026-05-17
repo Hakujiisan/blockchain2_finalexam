@@ -11,8 +11,8 @@ contract LootBox is Ownable {
     IGameItems public immutable gameItems;
 
     uint256 public constant LEGENDARY_SWORD = 1000;
-    uint256 public constant DRAGON_SHIELD   = 1001;
-    uint256 public constant MAGIC_STAFF     = 1002;
+    uint256 public constant DRAGON_SHIELD = 1001;
+    uint256 public constant MAGIC_STAFF = 1002;
 
     uint256 private _nonce;
 
@@ -23,11 +23,7 @@ contract LootBox is Ownable {
     }
 
     function openLootBox() external {
-        uint256 rand = uint256(keccak256(abi.encodePacked(
-            block.timestamp,
-            msg.sender,
-            _nonce++
-        ))) % 3;
+        uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, _nonce++))) % 3;
 
         uint256 itemId;
         if (rand == 0) itemId = LEGENDARY_SWORD;

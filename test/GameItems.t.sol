@@ -29,9 +29,12 @@ contract GameItemsTest is Test {
     function test_MintBatch() public {
         uint256[] memory ids = new uint256[](3);
         uint256[] memory amounts = new uint256[](3);
-        ids[0] = GOLD; amounts[0] = 500;
-        ids[1] = WOOD; amounts[1] = 300;
-        ids[2] = IRON; amounts[2] = 100;
+        ids[0] = GOLD;
+        amounts[0] = 500;
+        ids[1] = WOOD;
+        amounts[1] = 300;
+        ids[2] = IRON;
+        amounts[2] = 100;
         items.mintBatch(player1, ids, amounts);
         assertEq(items.balanceOf(player1, GOLD), 500);
         assertEq(items.balanceOf(player1, WOOD), 300);
@@ -45,9 +48,12 @@ contract GameItemsTest is Test {
 
         uint256[] memory inputIds = new uint256[](3);
         uint256[] memory inputAmounts = new uint256[](3);
-        inputIds[0] = GOLD; inputAmounts[0] = 100;
-        inputIds[1] = WOOD; inputAmounts[1] = 50;
-        inputIds[2] = IRON; inputAmounts[2] = 10;
+        inputIds[0] = GOLD;
+        inputAmounts[0] = 100;
+        inputIds[1] = WOOD;
+        inputAmounts[1] = 50;
+        inputIds[2] = IRON;
+        inputAmounts[2] = 10;
 
         vm.prank(player1);
         items.craft(inputIds, inputAmounts, LEGENDARY_SWORD, 1);
@@ -66,9 +72,12 @@ contract GameItemsTest is Test {
 
         uint256[] memory inputIds = new uint256[](3);
         uint256[] memory inputAmounts = new uint256[](3);
-        inputIds[0] = GOLD; inputAmounts[0] = 100;
-        inputIds[1] = WOOD; inputAmounts[1] = 50;
-        inputIds[2] = IRON; inputAmounts[2] = 10;
+        inputIds[0] = GOLD;
+        inputAmounts[0] = 100;
+        inputIds[1] = WOOD;
+        inputAmounts[1] = 50;
+        inputIds[2] = IRON;
+        inputAmounts[2] = 10;
 
         vm.prank(player1);
         items.craft(inputIds, inputAmounts, LEGENDARY_SWORD, 100);
@@ -100,8 +109,10 @@ contract GameItemsTest is Test {
     function test_BatchTransfer() public {
         uint256[] memory ids = new uint256[](2);
         uint256[] memory amounts = new uint256[](2);
-        ids[0] = GOLD; amounts[0] = 100;
-        ids[1] = WOOD; amounts[1] = 50;
+        ids[0] = GOLD;
+        amounts[0] = 100;
+        ids[1] = WOOD;
+        amounts[1] = 50;
         items.mintBatch(player1, ids, amounts);
 
         uint256[] memory transferAmounts = new uint256[](2);
@@ -132,8 +143,10 @@ contract GameItemsTest is Test {
         items.mint(player2, WOOD, 200);
         address[] memory accounts = new address[](2);
         uint256[] memory tokenIds = new uint256[](2);
-        accounts[0] = player1; tokenIds[0] = GOLD;
-        accounts[1] = player2; tokenIds[1] = WOOD;
+        accounts[0] = player1;
+        tokenIds[0] = GOLD;
+        accounts[1] = player2;
+        tokenIds[1] = WOOD;
         uint256[] memory balances = items.balanceOfBatch(accounts, tokenIds);
         assertEq(balances[0], 100);
         assertEq(balances[1], 200);

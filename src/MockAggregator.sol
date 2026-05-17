@@ -20,9 +20,7 @@ contract MockAggregator {
         updatedAt = _updatedAt;
     }
 
-    function latestRoundData() external view returns (
-        uint80, int256, uint256, uint256, uint80
-    ) {
+    function latestRoundData() external view returns (uint80, int256, uint256, uint256, uint80) {
         return (1, price, block.timestamp, updatedAt, 1);
     }
 }
