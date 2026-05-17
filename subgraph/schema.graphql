@@ -1,0 +1,44 @@
+type Player @entity {
+  id: ID!
+  address: Bytes!
+  craftCount: BigInt!
+  swapCount: BigInt!
+  itemBalances: [ItemBalance!]! @derivedFrom(field: "player")
+  craftEvents: [CraftEvent!]! @derivedFrom(field: "player")
+}
+
+type ItemBalance @entity {
+  id: ID!
+  player: Player!
+  tokenId: BigInt!
+  amount: BigInt!
+  updatedAt: BigInt!
+}
+
+type CraftEvent @entity {
+  id: ID!
+  player: Player!
+  outputId: BigInt!
+  amount: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type Swap @entity {
+  id: ID!
+  trader: Bytes!
+  tokenIn: Bytes!
+  amountIn: BigInt!
+  amountOut: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type LiquidityEvent @entity {
+  id: ID!
+  provider: Bytes!
+  amount0: BigInt!
+  amount1: BigInt!
+  lpMinted: BigInt!
+  timestamp: BigInt!
+}
