@@ -2,227 +2,767 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GameFi Economy</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
 <style>
-  body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:20px;background:#0f0f1a;color:#e0e0e0}
-  h1{color:#7F77DD;text-align:center}
-  .card{background:#1a1a2e;border-radius:12px;padding:20px;margin:16px 0;border:1px solid #2a2a4a}
-  button{background:#7F77DD;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin:4px}
-  button:hover{background:#534AB7}
-  input{width:100%;padding:8px;border:1px solid #2a2a4a;border-radius:6px;margin:6px 0;box-sizing:border-box;background:#0f0f1a;color:#e0e0e0}
-  .stat{display:inline-block;background:#16213e;padding:8px 16px;border-radius:8px;margin:4px;font-size:14px}
-  h2{color:#9f97ff;font-size:18px}
-  .green{color:#4caf50}
-  .red{color:#f44336}
+  :root {
+    --bg: #050810;
+    --surface: #0a0f1e;
+    --card: #0d1428;
+    --border: #1a2540;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+    --glow2: 0 0 20px rgba(124,58,237,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Floating orbs */
+  body::after {
+    content: '';
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    pointer-events: none;
+    z-index: 0;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(30px); }
+  }
+
+  /* Header */
+  .header {
+    position: relative;
+    z-index: 10;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-shadow: var(--glow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--glow);
+  }
+
+  .connect-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .connect-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .connect-btn:hover::before { opacity: 0.1; }
+  .connect-btn:hover { box-shadow: var(--glow); }
+  .connect-btn.connected {
+    border-color: var(--accent3);
+    color: var(--accent3);
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 1px;
+    background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-item {
+    flex: 1;
+    padding: 14px 24px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.green { color: var(--accent3); }
+
+  /* Main layout */
+  .main {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    min-height: calc(100vh - 120px);
+  }
+
+  .panel {
+    background: var(--card);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title::before {
+    content: '';
+    width: 3px;
+    height: 16px;
+    background: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  .panel-title.purple { color: var(--accent2); }
+  .panel-title.purple::before { background: var(--accent2); box-shadow: var(--glow2); }
+  .panel-title.green { color: var(--accent3); }
+  .panel-title.green::before { background: var(--accent3); }
+  .panel-title.warning { color: var(--warning); }
+  .panel-title.warning::before { background: var(--warning); }
+
+  /* Input */
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .input-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  input, textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input:focus, textarea:focus { border-color: var(--accent); }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 11px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05));
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+  .btn-primary:hover { background: rgba(0,212,255,0.2); box-shadow: var(--glow); }
+
+  .btn-purple {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(124,58,237,0.05));
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+  .btn-purple:hover { background: rgba(124,58,237,0.2); box-shadow: var(--glow2); }
+
+  .btn-green {
+    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+  }
+  .btn-green:hover { background: rgba(16,185,129,0.2); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+  .btn-warning {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+    border: 1px solid var(--warning);
+    color: var(--warning);
+  }
+  .btn-warning:hover { background: rgba(245,158,11,0.2); }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Status */
+  .status {
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    border-left: 3px solid;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.ok { border-color: var(--accent3); background: rgba(16,185,129,0.08); color: var(--accent3); }
+  .status.err { border-color: var(--danger); background: rgba(239,68,68,0.08); color: var(--danger); }
+  .status.info { border-color: var(--accent); background: rgba(0,212,255,0.08); color: var(--accent); }
+
+  /* Item grid */
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .item-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .item-card.selected { border-color: var(--accent); box-shadow: var(--glow); }
+
+  .item-icon { font-size: 24px; margin-bottom: 4px; }
+  .item-name { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .item-bal { font-family: 'Orbitron', monospace; font-size: 14px; color: var(--text); margin-top: 2px; }
+
+  /* Loot animation */
+  @keyframes loot-spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  .spinning { animation: loot-spin 0.8s ease-in-out; }
+
+  /* Wrong network banner */
+  .network-banner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(239,68,68,0.95);
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .network-banner.show { display: flex; align-items: center; justify-content: center; gap: 16px; }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Scan lines effect */
+  .panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.01) 2px,
+      rgba(0,212,255,0.01) 4px
+    );
+    pointer-events: none;
+    border-radius: 4px;
+  }
+  .panel { position: relative; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(0,212,255,0); }
+  }
+
+  .loot-btn-wrap { position: relative; }
+  .loot-btn-wrap .btn { width: 100%; padding: 16px; font-size: 13px; }
+  .loot-btn-wrap .btn:hover { animation: pulse-border 1.5s infinite; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--accent3); }
+  .badge-blue { background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.3); color: var(--accent); }
 </style>
 </head>
 <body>
-<h1>🎮 GameFi Economy</h1>
 
-<div class="card">
-  <h2>Connect Wallet</h2>
-  <button onclick="connect()">Connect MetaMask</button>
-  <div id="wallet-info" style="margin-top:12px;display:none">
-    <div class="stat">Address: <b id="addr"></b></div>
-    <div class="stat">GAME Balance: <b id="balance"></b></div>
-    <div class="stat">Voting Power: <b id="votes"></b></div>
-    <div class="stat">Network: <b id="network"></b></div>
+<div class="network-banner" id="net-banner">
+  ⚠ WRONG NETWORK — SWITCH TO ARBITRUM SEPOLIA
+  <button class="btn btn-danger" onclick="switchNetwork()" style="padding:6px 16px;font-size:10px">SWITCH</button>
+</div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">⚔</div>
+    GAMEFI ECONOMY
   </div>
-  <div id="wrong-network" style="display:none;color:#f44336;margin-top:8px">
-    ⚠️ Wrong network! Please switch to Arbitrum Sepolia
-    <button onclick="switchNetwork()" style="margin-left:8px">Switch Network</button>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div id="net-badge" style="display:none" class="badge badge-green">ARBITRUM SEPOLIA</div>
+    <button class="connect-btn" id="connect-btn" onclick="connect()">CONNECT WALLET</button>
+  </div>
+</header>
+
+<div class="stats-bar" id="stats-bar" style="display:none">
+  <div class="stat-item">
+    <div class="stat-label">Address</div>
+    <div class="stat-value accent" id="s-addr">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">GAME Balance</div>
+    <div class="stat-value" id="s-balance">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Voting Power</div>
+    <div class="stat-value green" id="s-votes">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Network</div>
+    <div class="stat-value" id="s-network">—</div>
   </div>
 </div>
 
-<div class="card">
-  <h2>Game Items (ERC-1155)</h2>
-  <p>Check your item balances</p>
-  <input id="item-id" placeholder="Token ID (1=GOLD, 2=WOOD, 3=IRON, 1000=SWORD)"/>
-  <button onclick="checkBalance()">Check Balance</button>
-  <div id="item-balance"></div>
-</div>
+<div class="main">
 
-<div class="card">
-  <h2>Craft Items</h2>
-  <p>Burn resources to craft legendary items</p>
-  <button onclick="craftSword()">Craft Legendary Sword (100 GOLD + 50 WOOD + 10 IRON)</button>
-  <div id="craft-status"></div>
-</div>
-
-<div class="card">
-  <h2>Loot Box</h2>
-  <p>Open a loot box to get a random item!</p>
-  <button onclick="openLootBox()">🎁 Open Loot Box</button>
-  <div id="loot-status"></div>
-</div>
-
-<div class="card">
-  <h2>Governance</h2>
-  <input id="delegate-addr" placeholder="Delegate votes to address"/>
-  <button onclick="delegateVotes()">Delegate Votes</button>
-  <div style="margin-top:12px">
-    <input id="proposal-id" placeholder="Proposal ID"/>
-    <button onclick="voteFor()" style="background:#4caf50">Vote For</button>
-    <button onclick="voteAgainst()" style="background:#f44336">Vote Against</button>
-    <button onclick="voteAbstain()" style="background:#ff9800">Abstain</button>
+  <!-- Panel 1: Items -->
+  <div class="panel">
+    <div class="panel-title">Game Items · ERC-1155</div>
+    <div class="item-grid">
+      <div class="item-card" onclick="checkItem(1,this)">
+        <div class="item-icon">🪙</div>
+        <div class="item-name">GOLD</div>
+        <div class="item-bal" id="bal-1">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(2,this)">
+        <div class="item-icon">🪵</div>
+        <div class="item-name">WOOD</div>
+        <div class="item-bal" id="bal-2">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(3,this)">
+        <div class="item-icon">⚙️</div>
+        <div class="item-name">IRON</div>
+        <div class="item-bal" id="bal-3">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(4,this)">
+        <div class="item-icon">💎</div>
+        <div class="item-name">CRYSTAL</div>
+        <div class="item-bal" id="bal-4">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(1000,this)">
+        <div class="item-icon">⚔️</div>
+        <div class="item-name">LEG. SWORD</div>
+        <div class="item-bal" id="bal-1000">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(1001,this)">
+        <div class="item-icon">🛡️</div>
+        <div class="item-name">DRAGON SHIELD</div>
+        <div class="item-bal" id="bal-1001">—</div>
+      </div>
+      <div class="item-card" onclick="checkItem(1002,this)">
+        <div class="item-icon">🔮</div>
+        <div class="item-name">MAGIC STAFF</div>
+        <div class="item-bal" id="bal-1002">—</div>
+      </div>
+      <div class="item-card" onclick="refreshBalances()">
+        <div class="item-icon">🔄</div>
+        <div class="item-name">REFRESH</div>
+        <div class="item-bal">ALL</div>
+      </div>
+    </div>
+    <div id="item-status" class="status"></div>
   </div>
-  <div id="gov-status"></div>
-</div>
 
-<div class="card">
-  <h2>Vault (ERC-4626)</h2>
-  <input id="vault-amount" placeholder="Amount of GAME tokens to deposit"/>
-  <button onclick="depositVault()">Deposit</button>
-  <button onclick="checkVaultBalance()">Check Shares</button>
-  <div id="vault-status"></div>
+  <!-- Panel 2: Craft -->
+  <div class="panel">
+    <div class="panel-title purple">Crafting System</div>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6">Burn resources to forge legendary equipment. Each craft requires specific materials.</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:Orbitron;font-size:12px;color:var(--text)">⚔️ Legendary Sword</span>
+          <span class="badge badge-blue">RARE</span>
+        </div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:12px">100 🪙 GOLD + 50 🪵 WOOD + 10 ⚙️ IRON</div>
+        <button class="btn btn-purple" style="width:100%" onclick="craft(1000, [[1,2,3],[100,50,10]])">FORGE SWORD</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:Orbitron;font-size:12px;color:var(--text)">🛡️ Dragon Shield</span>
+          <span class="badge badge-blue">EPIC</span>
+        </div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:12px">80 🪙 GOLD + 30 ⚙️ IRON + 5 💎 CRYSTAL</div>
+        <button class="btn btn-purple" style="width:100%" onclick="craft(1001, [[1,3,4],[80,30,5]])">FORGE SHIELD</button>
+      </div>
+    </div>
+    <div id="craft-status" class="status"></div>
+  </div>
+
+  <!-- Panel 3: Loot Box -->
+  <div class="panel">
+    <div class="panel-title warning">Loot Box System</div>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6">Each loot box contains one random legendary item. Outcomes are determined on-chain.</p>
+    <div style="background:var(--surface);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:20px;text-align:center">
+      <div id="loot-icon" style="font-size:52px;margin-bottom:12px">🎁</div>
+      <div style="font-family:Orbitron;font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:16px">MYSTERY REWARD INSIDE</div>
+      <button class="btn btn-warning" style="width:100%;padding:14px" onclick="openLootBox()">OPEN LOOT BOX</button>
+    </div>
+    <div id="loot-status" class="status"></div>
+  </div>
+
+  <!-- Panel 4: Vault -->
+  <div class="panel">
+    <div class="panel-title green">Vault · ERC-4626</div>
+    <p style="color:var(--muted);font-size:14px;line-height:1.6">Deposit GAME tokens to receive yield-bearing vault shares. Shares appreciate as the vault harvests rewards.</p>
+    <div class="input-group">
+      <div class="input-label">Amount to Deposit</div>
+      <input id="vault-amount" type="number" placeholder="0.0 GAME" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" style="flex:1" onclick="depositVault()">DEPOSIT</button>
+      <button class="btn btn-primary" style="flex:1" onclick="checkVaultShares()">CHECK SHARES</button>
+    </div>
+    <div id="vault-status" class="status"></div>
+  </div>
+
+  <!-- Panel 5: Governance -->
+  <div class="panel" style="grid-column:span 2">
+    <div class="panel-title">DAO Governance</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;color:var(--muted);letter-spacing:1px">DELEGATE VOTING POWER</div>
+        <div class="input-group">
+          <input id="delegate-addr" placeholder="Delegate to address (0x...)" />
+        </div>
+        <button class="btn btn-primary" onclick="delegateVotes()">DELEGATE VOTES</button>
+        <div id="delegate-status" class="status"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;color:var(--muted);letter-spacing:1px">CAST VOTE ON PROPOSAL</div>
+        <div class="input-group">
+          <input id="proposal-id" placeholder="Proposal ID" />
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-green" style="flex:1" onclick="vote(1)">FOR</button>
+          <button class="btn btn-danger" style="flex:1" onclick="vote(0)">AGAINST</button>
+          <button class="btn btn-warning" style="flex:1" onclick="vote(2)">ABSTAIN</button>
+        </div>
+        <div id="vote-status" class="status"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:13px;color:var(--muted);letter-spacing:1px">CHECK PROPOSAL STATUS</div>
+        <div class="input-group">
+          <input id="check-pid" placeholder="Proposal ID" />
+        </div>
+        <button class="btn btn-primary" onclick="checkProposal()">CHECK STATUS</button>
+        <div id="proposal-status" class="status"></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">GOVERNOR PARAMETERS</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Voting Delay</span><span style="font-family:Orbitron;font-size:12px">7200 blocks</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Voting Period</span><span style="font-family:Orbitron;font-size:12px">50400 blocks</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Quorum</span><span style="font-family:Orbitron;font-size:12px">4%</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Threshold</span><span style="font-family:Orbitron;font-size:12px">1%</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Timelock</span><span style="font-family:Orbitron;font-size:12px">2 days</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-const ADDRESSES = {
-  gameToken:   "0x7E7C0F7A93BCfC00c507C65d19F9ABC74398dD1d",
-  gameItems:   "0x477BE3c4616cbcFa89aEfb73054a71a1C462EFBC",
-  resourceAMM: "0x41ec899826C7d9619CCF06faa60af716fDF8A2C0",
-  itemVault:   "0x9046143CbBCb1245B1f00388cABe5547D1D64c82",
-  lootBox:     "0xd665aC62c6A10D6d69D9349Cf73857157fbA2f5E",
-  governor:    "0x495228aA67b232Be46c3c86e8f4206D5155C8e68"
+const ADDR = {
+  token:    "0x7E7C0F7A93BCfC00c507C65d19F9ABC74398dD1d",
+  items:    "0x477BE3c4616cbcFa89aEfb73054a71a1C462EFBC",
+  vault:    "0x9046143CbBCb1245B1f00388cABe5547D1D64c82",
+  lootbox:  "0xd665aC62c6A10D6d69D9349Cf73857157fbA2f5E",
+  governor: "0x495228aA67b232Be46c3c86e8f4206D5155C8e68"
 };
 
-const TOKEN_ABI = [
-  "function balanceOf(address) view returns(uint256)",
-  "function getVotes(address) view returns(uint256)",
-  "function delegate(address)",
-  "function approve(address,uint256)"
-];
-const ITEMS_ABI = [
-  "function balanceOf(address,uint256) view returns(uint256)",
-  "function craft(uint256[],uint256[],uint256,uint256)",
-  "function setApprovalForAll(address,bool)"
-];
-const VAULT_ABI = [
-  "function deposit(uint256,address) returns(uint256)",
-  "function balanceOf(address) view returns(uint256)"
-];
+const TOKEN_ABI = ["function balanceOf(address) view returns(uint256)","function getVotes(address) view returns(uint256)","function delegate(address)","function approve(address,uint256)"];
+const ITEMS_ABI = ["function balanceOf(address,uint256) view returns(uint256)","function craft(uint256[],uint256[],uint256,uint256)"];
+const VAULT_ABI = ["function deposit(uint256,address) returns(uint256)","function balanceOf(address) view returns(uint256)"];
 const LOOT_ABI = ["function openLootBox()"];
-const GOV_ABI = ["function castVote(uint256,uint8) returns(uint256)"];
+const GOV_ABI  = ["function castVote(uint256,uint8) returns(uint256)","function state(uint256) view returns(uint8)","function proposalVotes(uint256) view returns(uint256,uint256,uint256)"];
+const STATES   = ["Pending","Active","Canceled","Defeated","Succeeded","Queued","Expired","Executed"];
 
-const ARBITRUM_SEPOLIA = "0x66eee";
+let provider, signer, userAddr, token, items, vault, lootbox, governor;
 
-let provider, signer, userAddress;
-let token, items, vault, lootBox, governor;
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `status show ${type}`;
+}
 
 async function connect() {
   if (!window.ethereum) return alert("Install MetaMask!");
   provider = new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   signer = await provider.getSigner();
-  userAddress = await signer.getAddress();
+  userAddr = await signer.getAddress();
+  const net = await provider.getNetwork();
+  const isArb = net.chainId === 421614n;
 
-  const network = await provider.getNetwork();
-  if (network.chainId.toString(16) !== "66eee") {
-    document.getElementById("wrong-network").style.display = "block";
-  } else {
-    document.getElementById("wrong-network").style.display = "none";
-  }
+  document.getElementById("net-banner").className = isArb ? "network-banner" : "network-banner show";
+  document.getElementById("net-badge").style.display = isArb ? "flex" : "none";
+  document.getElementById("stats-bar").style.display = "flex";
+  document.getElementById("connect-btn").textContent = userAddr.slice(0,6)+"..."+userAddr.slice(-4);
+  document.getElementById("connect-btn").className = "connect-btn connected";
 
-  token   = new ethers.Contract(ADDRESSES.gameToken, TOKEN_ABI, signer);
-  items   = new ethers.Contract(ADDRESSES.gameItems, ITEMS_ABI, signer);
-  vault   = new ethers.Contract(ADDRESSES.itemVault, VAULT_ABI, signer);
-  lootBox = new ethers.Contract(ADDRESSES.lootBox, LOOT_ABI, signer);
-  governor = new ethers.Contract(ADDRESSES.governor, GOV_ABI, signer);
+  token    = new ethers.Contract(ADDR.token, TOKEN_ABI, signer);
+  items    = new ethers.Contract(ADDR.items, ITEMS_ABI, signer);
+  vault    = new ethers.Contract(ADDR.vault, VAULT_ABI, signer);
+  lootbox  = new ethers.Contract(ADDR.lootbox, LOOT_ABI, signer);
+  governor = new ethers.Contract(ADDR.governor, GOV_ABI, signer);
 
-  const bal   = await token.balanceOf(userAddress);
-  const votes = await token.getVotes(userAddress);
-  document.getElementById("addr").textContent    = userAddress.slice(0,6)+"..."+userAddress.slice(-4);
-  document.getElementById("balance").textContent = ethers.formatEther(bal) + " GAME";
-  document.getElementById("votes").textContent   = ethers.formatEther(votes) + " GAME";
-  document.getElementById("network").textContent = network.name || "Arbitrum Sepolia";
-  document.getElementById("wallet-info").style.display = "block";
+  await updateStats();
+  await refreshBalances();
 }
 
-async function switchNetwork() {
-  await window.ethereum.request({
-    method: "wallet_switchEthereumChain",
-    params: [{ chainId: "0x66eee" }]
-  });
-}
-
-async function checkBalance() {
-  const id = document.getElementById("item-id").value;
-  if (!id) return;
-  const bal = await items.balanceOf(userAddress, id);
-  document.getElementById("item-balance").textContent = `Balance: ${bal.toString()}`;
-}
-
-async function craftSword() {
-  document.getElementById("craft-status").textContent = "Crafting...";
+async function updateStats() {
   try {
-    const tx = await items.craft([1,2,3],[100,50,10],1000,1);
+    const [bal, votes, net] = await Promise.all([token.balanceOf(userAddr), token.getVotes(userAddr), provider.getNetwork()]);
+    document.getElementById("s-addr").textContent = userAddr.slice(0,6)+"..."+userAddr.slice(-4);
+    document.getElementById("s-balance").textContent = parseFloat(ethers.formatEther(bal)).toLocaleString() + " GAME";
+    document.getElementById("s-votes").textContent = parseFloat(ethers.formatEther(votes)).toLocaleString() + " GAME";
+    document.getElementById("s-network").textContent = net.chainId === 421614n ? "Arbitrum Sepolia" : "Wrong Network";
+  } catch(e) {}
+}
+
+async function checkItem(id, el) {
+  if (!items) return;
+  try {
+    const bal = await items.balanceOf(userAddr, id);
+    document.getElementById(`bal-${id}`).textContent = bal.toString();
+    document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+  } catch(e) {}
+}
+
+async function refreshBalances() {
+  if (!items) return;
+  setStatus('item-status', 'Loading balances...', 'info');
+  try {
+    await Promise.all([1,2,3,4,1000,1001,1002].map(id => checkItem(id, null)));
+    document.getElementById('item-status').className = 'status';
+  } catch(e) { setStatus('item-status', 'Error loading balances', 'err'); }
+}
+
+async function craft(outputId, [inputIds, inputAmounts]) {
+  if (!items) return;
+  setStatus('craft-status', 'Crafting...', 'info');
+  try {
+    const tx = await items.craft(inputIds, inputAmounts, outputId, 1);
+    setStatus('craft-status', 'Transaction submitted...', 'info');
     await tx.wait();
-    document.getElementById("craft-status").innerHTML = '<span class="green">Legendary Sword crafted!</span>';
-  } catch(e) {
-    document.getElementById("craft-status").innerHTML = '<span class="red">'+e.reason+'</span>';
-  }
+    setStatus('craft-status', 'Item crafted successfully!', 'ok');
+    await refreshBalances();
+  } catch(e) { setStatus('craft-status', e.reason || 'Craft failed — check your resource balances', 'err'); }
 }
 
 async function openLootBox() {
-  document.getElementById("loot-status").textContent = "Opening...";
+  if (!lootbox) return;
+  const icon = document.getElementById('loot-icon');
+  icon.classList.add('spinning');
+  setStatus('loot-status', 'Opening loot box...', 'info');
   try {
-    const tx = await lootBox.openLootBox();
+    const tx = await lootbox.openLootBox();
     await tx.wait();
-    document.getElementById("loot-status").innerHTML = '<span class="green">Loot box opened! Check your items.</span>';
+    icon.classList.remove('spinning');
+    icon.textContent = ['⚔️','🛡️','🔮'][Math.floor(Math.random()*3)];
+    setStatus('loot-status', 'Loot box opened! Check your legendary items.', 'ok');
+    await refreshBalances();
   } catch(e) {
-    document.getElementById("loot-status").innerHTML = '<span class="red">'+e.reason+'</span>';
+    icon.classList.remove('spinning');
+    icon.textContent = '🎁';
+    setStatus('loot-status', e.reason || 'Failed to open loot box', 'err');
   }
 }
 
 async function delegateVotes() {
-  const addr = document.getElementById("delegate-addr").value;
-  if (!addr) return;
-  document.getElementById("gov-status").textContent = "Delegating...";
-  const tx = await token.delegate(addr);
-  await tx.wait();
-  document.getElementById("gov-status").innerHTML = '<span class="green">Delegated!</span>';
+  const addr = document.getElementById('delegate-addr').value;
+  if (!addr || !token) return;
+  setStatus('delegate-status', 'Delegating...', 'info');
+  try {
+    const tx = await token.delegate(addr);
+    await tx.wait();
+    setStatus('delegate-status', 'Votes delegated successfully!', 'ok');
+    await updateStats();
+  } catch(e) { setStatus('delegate-status', e.reason || 'Delegation failed', 'err'); }
 }
 
-async function voteFor()     { await castVote(1); }
-async function voteAgainst() { await castVote(0); }
-async function voteAbstain() { await castVote(2); }
-
-async function castVote(support) {
-  const id = document.getElementById("proposal-id").value;
-  if (!id) return;
-  document.getElementById("gov-status").textContent = "Voting...";
+async function vote(support) {
+  const id = document.getElementById('proposal-id').value;
+  if (!id || !governor) return;
+  setStatus('vote-status', 'Casting vote...', 'info');
   try {
     const tx = await governor.castVote(id, support);
     await tx.wait();
-    const labels = ["Against","For","Abstain"];
-    document.getElementById("gov-status").innerHTML = '<span class="green">Voted '+labels[support]+'!</span>';
-  } catch(e) {
-    document.getElementById("gov-status").innerHTML = '<span class="red">'+e.reason+'</span>';
-  }
+    setStatus('vote-status', `Voted ${['Against','For','Abstain'][support]}!`, 'ok');
+  } catch(e) { setStatus('vote-status', e.reason || 'Vote failed', 'err'); }
+}
+
+async function checkProposal() {
+  const id = document.getElementById('check-pid').value;
+  if (!id || !governor) return;
+  try {
+    const [state, votes] = await Promise.all([governor.state(id), governor.proposalVotes(id)]);
+    setStatus('proposal-status', `State: ${STATES[state]} | For: ${parseFloat(ethers.formatEther(votes[1])).toFixed(0)} | Against: ${parseFloat(ethers.formatEther(votes[0])).toFixed(0)} | Abstain: ${parseFloat(ethers.formatEther(votes[2])).toFixed(0)}`, 'info');
+  } catch(e) { setStatus('proposal-status', 'Proposal not found', 'err'); }
 }
 
 async function depositVault() {
-  const amount = document.getElementById("vault-amount").value;
-  if (!amount) return;
-  document.getElementById("vault-status").textContent = "Approving...";
+  const amount = document.getElementById('vault-amount').value;
+  if (!amount || !vault || !token) return;
+  setStatus('vault-status', 'Approving...', 'info');
   try {
     const parsed = ethers.parseEther(amount);
-    const approveTx = await token.approve(ADDRESSES.itemVault, parsed);
+    const approveTx = await token.approve(ADDR.vault, parsed);
     await approveTx.wait();
-    document.getElementById("vault-status").textContent = "Depositing...";
-    const depositTx = await vault.deposit(parsed, userAddress);
-    await depositTx.wait();
-    document.getElementById("vault-status").innerHTML = '<span class="green">Deposited successfully!</span>';
-  } catch(e) {
-    document.getElementById("vault-status").innerHTML = '<span class="red">'+e.reason+'</span>';
-  }
+    setStatus('vault-status', 'Depositing...', 'info');
+    const tx = await vault.deposit(parsed, userAddr);
+    await tx.wait();
+    setStatus('vault-status', `Deposited ${amount} GAME successfully!`, 'ok');
+    await updateStats();
+  } catch(e) { setStatus('vault-status', e.reason || 'Deposit failed', 'err'); }
 }
 
-async function checkVaultBalance() {
-  const shares = await vault.balanceOf(userAddress);
-  document.getElementById("vault-status").textContent = "Vault shares: " + ethers.formatEther(shares);
+async function checkVaultShares() {
+  if (!vault) return;
+  try {
+    const shares = await vault.balanceOf(userAddr);
+    setStatus('vault-status', `Your vault shares: ${parseFloat(ethers.formatEther(shares)).toFixed(4)} gvSHARE`, 'info');
+  } catch(e) { setStatus('vault-status', 'Error checking shares', 'err'); }
+}
+
+async function switchNetwork() {
+  await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x66eee" }] });
+  location.reload();
 }
 </script>
 </body>
